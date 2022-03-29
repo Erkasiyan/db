@@ -179,7 +179,36 @@ FROM
                 더할개월수에 음수를 입력하면
                 해당 개월수를 뺀 날짜를 알려준다.
                 
-    3. 
+    3. LAST_DAY
+        ==> 지정한 날짜가 포함된 월의 마지막 날짜를 알려주는 함수
+            
+        형식 ]
+            LAST_DAY(날짜)
+            
+    4. NEXT_DAY
+        ==> 지정한 날짜 이후에 가장 처음 오는 지정한 요일에 해당하는 날짜를 알려주는 함수
+        
+        형식 ]
+            NEXT_DAY(날짜, 요일)
+            
+            참고 ]
+                요일 정하는 방법
+                    
+                    1. 우리는 한글 세팅이 된 오라클이므로
+                        '월', '화', '수',...
+                        '월요일', '화요일', ...
+                    2. 영문권에서는
+                        'SUN', 'MON',...
+                        'SUNDAY', 'MONDAY', ...
+                        
+    5. ROUND()
+        ==> 날짜를 지정한 부분에서 반올림하는 함수
+            이때 지정부분은 년, 월, 일, ...
+            
+            형식 ]
+                ROUND(날짜, 기준단위)
+                
+--------------------------------------------------------------------------------
 */
 
 SELECT
@@ -194,6 +223,118 @@ SELECT
     ename 사원이름,
     hiredate 입사일,
     TRUNC(MONTHS_BETWEEN(SYSDATE, hiredate)) "근무개월수"
+FROM
+    emp
+;
+
+-- 이번달 마지막 날짜를 조회하세요.
+SELECT LAST_DAY(sysdate) FROM dual;
+
+-- 사원들의 첫번째 월급을 조회하세요. 급여지급은 매월 말일로 한다.
+SELECT
+    ename 사원이름, sal 급여, hiredate 입사일, LAST_DAY(hiredate) 첫급여일
+FROM
+    emp
+;
+-- 사원들의 첫번째 월급을 조회하세요. 급여지급은 매월 1일로 한다.
+SELECT
+    ename 사원이름, sal 급여, hiredate 입사일, (LAST_DAY(hiredate) + 1) 첫급여일
+FROM
+    emp
+;
+
+-- 이번주 일요일이 몇일인지 조회하세요.
+SELECT
+    NEXT_DAY(sysdate, '일')
+FROM
+    dual
+;
+
+-- 올 성탄절 이후 첫 토요일은??
+SELECT
+    NEXT_DAY(TO_DATE('2022/12/25', 'YYYY/MM/DD'), '토') AS "첫토요일"
+    -- 이 경우는 날짜데이터를 입력해야 하지만
+    -- 문자로 입력해도 실행되는 이유는 문자데이터를 날짜데이터로 변환해주는
+    -- 함수가 자동호출되서 날짜데이터로 변환해주기 때문에 그렇다.
+FROM
+    dual
+;
+
+-- 현재시간을 년도를 기준으로 반올림하세요.
+SELECT TO_CHAR(ROUND(sysdate, 'YEAR'), 'YYYY/MM/DD HH24:mi:ss') 반올림 FROM dual;
+
+-- 현지시간을 월을 기준으로 반올림하세요.
+SELECT SYSDATE, ROUND(sysdate, 'MONTH') 월반올림 FROM dual;
+
+-----------------------------------------------------------------------------------
+/*
+    변환함수
+    ==> 함수는 데이터 형태에 따라서 사용하는 함수가 달라진다.
+        그런데 만약 사용하려는 데이터가 함수에 필요한 데이터가 아닌경우에는
+        데이터의 형태를 변환해서 사용해야 한다.
+        ==> 데이터의 형태를 바꾸어서 특정 함수에 사용가능하도록 만들어 주는 함수
+        
+                        TO_CHAR()               TO_CHAR()
+                    ----------->            <---------
+         NUMBER     <---------->    CHAR    <--------->  DATE
+                    <----------             ---------->
+                        TO_NUMBER               TO_DATE()
+    1. TO_CHAR()
+        ==> 날짜나 숫자를 문자 데이터로 변환시켜주는 함수
+        
+        형식 1 ]
+            TO_CHAR(날짜 또는 숫자)
+            
+        형식 2 ]
+            
+             TO_CHAR(날짜 또는 숫자, 형식)
+             ==> 바꿀때 원하는 형태를 지정해서 문자열로 변환시키는 방법
+             
+             주의사항 ]
+                숫자를 문자로 변환할때 형식으로 사용하는 문자는
+                    9   - 무효숫자는 표현안한다.
+                    0   - 무효숫자도 표현한다.
+            
+    2. TO_DATE()
+    
+    3. TO_NUMBER()
+    
+*/
+
+/*
+    사원들의 사원이름, 입사일, 부서번호를 조회하세요.
+    단, 입사일은 '0000년 00월 00일' 의 형식으로 조회되게 하세요.
+*/
+SELECT
+    ename 사원이름, TO_CHAR(hiredate, 'YYYY') || '년 ' || TO_CHAR(hiredate, 'MM') || '월 ' || TO_CHAR(hiredate, 'DD') || '일' 입사일,
+    TO_CHAR(hiredate, 'YYYY"년 "MM"월 "DD"일"') 한글입사일,
+    deptno 부서번호
+FROM
+    emp
+;
+
+-- 급여가 100 ~ 999 사이인 사원의 정보를 조회하세요.
+SELECT
+    ename, sal
+FROM
+    emp
+WHERE
+    sal BETWEEN 100 AND 999
+;
+
+SELECT
+    ename, sal
+FROM
+    emp
+WHERE
+--    TO_CHAR(sal) LIKE '___'
+    LENGTH(TO_CHAR(sal)) = 3
+;
+
+-- 사원 급여를 조회하는데 앞에는 $를 붙이고 3자리마다 , 를 붙여서 조회하세요.
+SELECT
+    ename 사원이름, sal 급여, TO_CHAR(sal, '$9,999,999,999,999') 문자급여1,
+    TO_CHAR(sal, '$0,000,000') 문자급여2
 FROM
     emp
 ;
