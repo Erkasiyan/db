@@ -706,7 +706,7 @@ SELECT AVG(comm), FLOOR(2200 / 14) 예상계산 FROM emp;
 -- 직급별 급여평균을 직급명과 함께 조회하세요.
 
 SELECT
-    job 부서이름, FLOOR(AVG(sal)) 부서평균급여
+    job 직급이름, FLOOR(AVG(sal)) 직급평균급여
 FROM
     emp
 GROUP BY
