@@ -704,14 +704,34 @@ FROM
     문제 4 ] 문자열 처리함수를 사용해서 해결하세요.
         사원이름중 'a' 가 존재하지 않는 사원의 정보를 조회하세요.
 */
+SELECT INSTR('JENNIE', 'j') FROM DUAL;
+SELECT
+    empno 사원번호, ename 사원이름, job 사원직급, hiredate 입사일, sal 사원급여
+FROM
+    emp
+WHERE
+    INSTR(ename, 'a') = 0 -- 데이터베이스에서는 위치값이 1부터 시작한다.
+;
 
+SELECT
+    empno 사원번호, ename 사원이름, job 사원직급, hiredate 입사일, sal 사원급여
+FROM
+    emp
+WHERE
+    ename NOT LIKE '%a%'
+;
 /*
     문제 5 ]
         사원이름 중에서 뒤 2글자만 남기고
         앞 글자는 모두 '#' 으로 대체해서 
         사원이름, 입사일, 급여를 조회하세요.
 */
-
+SELECT
+    ename 사원이름, hiredate 입사일, sal 사원급여,
+    LPAD(SUBSTR(ename, -2), LENGTH(ename), '#') 추출이름
+FROM
+    emp
+;
 /*
     문제 6 ] 문자열 처리함수를 사용해서 처리하세요.
         'jennie@githrd.com' 
@@ -722,3 +742,35 @@ FROM
         .com도 표시하고 나머지는 * 로 대체해서 조회되는
         질의명령을 작성하세요.
 */
+
+SELECT
+    CONCAT(
+        CONCAT(
+            RPAD(
+                LPAD(
+                    SUBSTR('jennie@githrd.com' , 3, 1), 
+                    3, 
+                    '*'
+                ), 
+                INSTR('jennie@githrd.com', '@') - 1 , 
+                '*'
+            ), 
+            '@'
+        ),
+        LPAD(
+            SUBSTR(
+                'jennie@githrd.com', 
+                INSTR('jennie@githrd.com' , '.')
+            ),
+            LENGTH(
+                SUBSTR(
+                    'jennie@githrd.com', 
+                    INSTR('jennie@githrd.com', '@') + 1
+                )
+            ),
+            '*'
+        )
+    ) 제니메일
+FROM
+    dual
+;
