@@ -30,6 +30,33 @@
             따라서 정확한 데이터만 필터링해서 꺼내와야 하는데
             이때 이 필터링하는 작업이 JOIN 이라고 한다.
                 
+                
+    종류 ]
+        
+        Inner Join
+        ==>  나열된 테이블들의 결과집합 안에서 꺼내오는 조인...
+            Equi Join
+            ==> 조인을 할때 동등비교연산자로 조인을 하는 경우
+            
+            Non Equi Join
+            ==> 조인을 할 때 동등비교연산자 이외의 연산자로 조인하는 겨우
+            
+        Outer Join
+        ==> Catesian Product 에 포함되지 않는 데이터를 가져오는 조인
+            
+            형식 ]
+                
+                테이블이름.필드이름 = 테이블이름.필드이름(+)
+                
+                이때 (+) 는 NULL 로 표현되어야 할 테이블쪽에 붙여준다.
+                
+                
+        Self Join
+        ==> 조인을 하는데 대상테이블이 같은 테이블을 사용하는 조인
+        
+        
+    참고 ]
+        조인에서도 다른 일반조건을 사용할 수 있다.
 */
 
 -- 영문색상이름 테이블
@@ -63,10 +90,19 @@ VALUES(
     102, '#0000FF', 'blue'
 );
 
+INSERT INTO
+    ecolor
+VALUES(
+    103, '#800080', 'purple'
+);
+
+commit;
+
 -- 영문칼라테이블 조회
 SELECT * FROM ecolor;
 COMMIT; -- 메모리의 작업영역에서 작업한 내용을 데이터베이스에 적용시키는 명령
 
+DROP TABLE kcolor; --  테이블 삭제명령
 
 CREATE TABLE kcolor (
     ckno NUMBER(3)
@@ -116,9 +152,69 @@ FROM
 ;
 
 SELECT
-    ceno cno, e.code, e.name ename, k.name kname
+    e.ceno cno, e.code, e.name ename, k.name kname
 FROM
     ecolor e, kcolor k
 WHERE
     e.code = k.code -- 조인조건
 ;
+
+-- Outer Join
+SELECT
+    e.ceno cno, e.code, e.name ename, k.name kname
+FROM
+    ecolor e, kcolor k
+WHERE
+    e.code = k.code(+)
+;
+
+-- self join
+-- 사원들의 사원이름, 상사번호, 상사이름, 상사급여 를 조회하세요.
+
+SELECT
+    e.ename 사원이름, e.mgr 상사번호, s.ename 상사이름, s.sal 상사급여
+FROM
+    emp e, emp s
+WHERE
+    e.mgr = s.empno(+)
+;
+
+create table sansa 
+as
+    select * from emp;
+    
+-- 사원들의 사원이름, 직급, 급여, 급여등급 을 조회하세요.
+
+SELECT
+    ename 사원이름, job 직급, sal 급여, grade 급여등급
+FROM
+    emp, salgrade
+WHERE
+    sal BETWEEN losal AND hisal
+;
+
+-- 사원들의 사원번호, 사원이름, 직급, 부서이름, 부서위치 를 조회하세요.
+
+SELECT
+    empno 사원번호, ename 사원이름, job 직급, dname 부서이름, loc 부서위치
+FROM
+    emp e, dept d
+WHERE
+    e.deptno = d.deptno
+;
+
+-- 81년 입사한 사원의
+-- 사원이름, 직급, 입사일, 부서이름 을 조회하세요.
+SELECT
+    ename 사원이름, job 직급, TO_CHAR(hiredate,'YYYY"년 "MM"월 "DD"일"') 입사일, dname 부서이름
+FROM
+    emp, dept
+WHERE
+    emp.deptno = dept.deptno    -- 조인조건
+    AND TO_CHAR(hiredate, 'yy') = '81'  -- 일반조건
+;
+
+
+
+
+
