@@ -416,7 +416,8 @@ AS
         e.deptno = d.deptno
 ;
 
-
+alter table tmp
+rename column dno to deptno;
 -- TMP 테이블과  부서정보테이블을 이용해서 
 -- 사원들의 사원이름, 부서위치를 조회하세요.
 SELECT
@@ -428,3 +429,240 @@ JOIN
 USING
     (deptno)
 ;
+
+--------------------------------------------------------------------------------
+/*
+    부질의(SUB QUERY, 서브질의)
+    ==> 질의명령 안에 다시 질의명령을 포함하는 경우
+        포함되는 그 질의 명령을 서브질의 또는 서브쿼리 라고 부른다.
+        
+        예 ]
+            이름이 SMITH 인 사원과 같은 부서에 있는 사원들의 정보를 조회하세요.
+            ==> 이 경우 SMITH 의 부서번호를 알아내기 위해서 먼저 질의명령이 실행되어야 한다.
+            
+            ==> 꺼내온 부서번호를 이용해서 정보를 조회
+            
+            이때 위의 질의명령을 아래 메인질의명령에서 조회해서 사용해야 한다.
+            
+    참고 ]
+        이때 서브질의를 감싸는 질의 명령을 메인질의 명령이라 부른다.
+        
+    서브질의의 위치에 따른 결과
+        1. SELECT 절
+        ==> 이 부분에 사용되는 질의명령은 결과가 반드시 한행, 한필드가 나와야한다.
+        2. FROM 절
+        ==> FROM 절에는 테이블이 나열되어야 한다.
+            그런데 조회 질의 명령의 결과는 마치 테이블과 같다.
+            그러면 이 조회 질의 명령의 결과를 테이블처럼 사용할 수 있는 방법
+            
+            이때 FROM 절 안에 들어가는 서브질의를
+            특별히 마치 테이블과 같다해서
+                INLINE TABLE
+            이라고 부른다.
+            
+            이때 사용은 질의명령을 보낼때 사용한 별칭을 
+            사용해서 데이터를 꺼내야 한다.
+            
+        3. WHERE 절
+            1. 단일행 단일필드로 결과가 발생하는 경우
+            ==> 결과를 비교에 사용하면 된다.
+            
+            2. 다중행 단일필드로 결과가 발생하는 경우
+                참고 ]
+                    서브질의의 결과가 다중행 단일필드로 결과가 발생하는 경우
+                    이때 사용하는 연산자
+                    
+                    IN  : 여러개의 데이터중 하나만 맞으면 되는 경우
+                        ==> 묵시적으로  여러값중 하나와 동등비교처리를 한다.
+                        
+                    ANY : 여러개의 데이터 중 하나만 맞으면 되는 경우
+                        ==> 대소비교 연산자도 사용가능 
+                        
+                    ALL : 여러개의 데이터가 모두 맞으면 되는 경우
+                        ==> 동등비교는 사용할 수 없고
+                            대소비교할 때 사용한다.
+                    
+                
+            3. 다중행 다중필드로 결과가 발생하는 방법
+            
+                EXISTS : 질의명령의 결과가 있으면 참, 없으면 거짓...
+*/
+SELECT
+    *
+FROM
+    emp
+WHERE
+    deptno = (
+                SELECT
+                    deptno
+                FROM
+                    emp
+                WHERE
+                    ename = 'SMITH'
+            )
+;
+
+-- 사원들의 사원이름, 부서번호, 부서이름, 부서위치
+SELECT
+    ename 사원이름, deptno 부서번호, 
+    (
+        SELECT
+            dname
+        FROM
+            dept
+        WHERE
+            deptno = e.deptno
+    ) 부서이름,
+    (
+        SELECT
+            loc
+        FROM
+            dept
+        WHERE
+            deptno = e.deptno
+    ) 부서위치
+FROM
+    emp e
+;
+
+
+-- 조건절에 단일행 단일필드의 결과
+-- SMITH 사원과 동일한 부서의 사원들의 정보를 조회하세요.
+SELECT
+    *
+FROM
+    emp
+WHERE
+    deptno = (
+                SELECT
+                    deptno
+                FROM
+                    emp
+                WHERE
+                    ename = 'SMITH'
+            )
+;
+
+-- 10부서 사원들의 직급 평균을 조회하세요.
+SELECT
+    job 직급이름, AVG(sal) 직급급여평균
+FROM
+    emp
+WHERE
+    job IN (
+            SELECT
+                job
+            FROM
+                emp
+            WHERE
+                deptno = 10 
+                -- 질의명령의 결과는 다중값으로 발생한다. 
+                --     MANAGER, PRESIDENT, CLERK
+        )
+GROUP BY
+    job
+;
+
+--------------------------------------------------------------------------------
+
+-- IN
+-- 직급이  MANAGER인 사원과 같은 부서에 속한 사원들의 
+--      사원이름, 직급, 부서번호 를 조회하세요.
+SELECT
+    ename 사원이름, job 직급, deptno 부서번호
+FROM
+    emp
+WHERE
+    deptno IN (
+                SELECT
+                    deptno
+                FROM
+                    emp
+                WHERE
+                    job = 'MANAGER'
+             )
+;
+
+-- ANY
+-- 각 부서의 평균 급여보다 한부서라도 급여가 높은 사원들의 
+-- 사원이름, 사원급여, 부서번호 를 조회하세요.
+SELECT
+    ename 사원이름, sal 사원급여, deptno 부서번호
+FROM
+    emp
+WHERE
+    sal > any (
+            SELECT
+                AVG(sal)
+            FROM
+                emp
+            GROUP BY
+                deptno
+          )
+;
+
+-- 모든 각부서의 급여 평균보다 높은 급여를 받는 사원들의
+-- 사원이름, 사원급여, 부서번호 를 조회하세요.
+SELECT
+    ename 사원이름, sal 사원급여, deptno 부서번호
+FROM
+    emp
+WHERE
+    NOT sal > ALL (
+            SELECT
+                AVG(sal)
+            FROM
+                emp
+            GROUP BY
+                deptno
+          )
+;
+
+-- 사원중 40번 부서 사원이 존재하면 모든 사원들의
+-- 사원이름, 부서번호 를 조회하세요.
+SELECT
+    scott.emp.ename 사원이름, deptno 부서번호
+FROM
+    scott.emp
+    /*
+        테이블을 가리킬때 원칙은
+            계정.테이블이름
+        의 형식으로 사용해야 한다.
+        하지만 접속계정이 가지고있는 테이블에 한해서는
+        테이블이름만 기술해도 된다.
+    */
+WHERE
+    EXISTS ( -- 부정은 NOT EXISTS 로 표현한다.
+                SELECT
+                    *
+                FROM
+                    emp
+                WHERE
+                    deptno = 40
+            )
+;
+
+--------------------------------------------------------------------------------
+-- 사원들의 사원이름, 부서번호, 부서원수, 부서평균급여, 부서급여합계 를 조회하세요.
+
+SELECT
+    ename 사원이름, deptno 부서번호, 
+    cnt 부서원수, 부서평균 부서평균급여, sum 부서급여합계
+FROM
+    emp,
+    (
+        SELECT
+            deptno dno, COUNT(*) cnt, ROUND(AVG(sal), 2) 부서평균, SUM(sal) sum
+        FROM
+            emp
+        GROUP BY
+            deptno
+    )
+WHERE
+    deptno = dno
+;
+
+
+--------------------------------------------------------------------------------
+-- 회사 평균급여보다 적게 받는 사원들의
+-- 사원이름, 직급, 입사일, 급여 를 조회하세요.
