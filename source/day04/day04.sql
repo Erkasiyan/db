@@ -25,7 +25,7 @@
     참고 ]
         관계형데이터베이스에서는 여러개의 테이블에서 동시에 검색하는 기능은 이미 가지고 있다.
         ==> 이때 여러개의 테이블에서 데이터를 동시에 검색하면
-            Cartesian Product 가 만들어지는데
+            Cartesian Product(CROSS JOIN) 가 만들어지는데
             이 결과에는 정확하지 않은 데이터도 포함되어있다.
             따라서 정확한 데이터만 필터링해서 꺼내와야 하는데
             이때 이 필터링하는 작업이 JOIN 이라고 한다.
@@ -214,7 +214,217 @@ WHERE
     AND TO_CHAR(hiredate, 'yy') = '81'  -- 일반조건
 ;
 
+SELECT * FROM EMP, SALGRADE
+WHERE
+    ENAME = 'KING'
+    AND SAL BETWEEN LOSAL AND HISAL
+;
+
+--------------------------------------------------------------------------------
+/*
+    ANSI JOIN
+    ==> 질의 명령은 데이터베이스(DBMS)에 따라서 약간ㅆ기 그 분법이 달라진다.
+        
+        ANSI 형식이란
+        미국 국립 표준 협회(ANSI)에서 공통의 질의 명령을 만들고자 해서 통일된 방식의
+        명령을 만들어 놓은것.
+        따라서 DBMS를 가리지 않고 실행이 된다.
+        
+    -------------------------------------------------------------------------------
+    1. Cross Join
+        ==> 오라클의 Cartesion Product 를 생성하는 조인
+        
+        형식 ]
+            SELECT
+                필드이름, ...
+            FROM
+                테이블1 CROSS JOIN 테이블2
+            ;
+        
+    2. Inner Join
+        ==> Equi Join, Non Equi Join, Self Join
+        
+        형식 ]
+            SELECT
+                필드이름, ....
+            FROM
+                테이블1 [INNER ]JOIN 테이블2
+            ON
+                조인조건
+            ;
+            
+        참고 ]
+            조인조건은 ON 절에서 기술하고
+            일반조건은 WHERE 절에서 기술한다.
+            
+        참고 ]
+            INNER JOIN이 가장 일반적인 조인이기 때문에 INNER 라는 단어를 생략하면
+            INNER JOIN을 해석해서 실행하게 된다.
+        
+    3. Outer Join
+        ==> Cartesion Product 에 없는 결과를 조회하는 조인 명령
+        
+        형식 ]
+            
+            SELECT
+                필드이름, ...
+            FROM
+                테이블1 LEFT  또는 RIGHT 또는 FULL OUTER JOIN 테이블2
+            ON
+                조인조건
+            ;
+        
+        이때 방향은 데이터가 있는 쪽 테이블을 가리키면 된다.
+        
+    참고 ]
+        조인이 2개이상 되는 경우에는
+        형식 ]
+            
+            SELECT
+            
+            FROM
+                테이블이름 
+            JOIN 
+                테이블2
+            ON
+                조인조건
+            JOIN
+                테이블3
+            ON
+                조인조건2
+            ;
+            
+*/
+
+-- ANSI JOIN
+-- CROSS JOIN
+-- 사원정보와 부서정보를 크로스조인하세요.
+SELECT
+    *
+FROM
+    emp CROSS JOIN dept
+;
+
+-- INNER JOIN
+-- 사원들의 사원이름, 직급, 부서번호, 부서이름 을 조회하세요.
+SELECT
+    ename 사원이름, job 직급, e.deptno 부서번호, dname 부서이름
+FROM
+    emp e INNER JOIN dept d
+ON -- 조인조건절...
+    e.deptno = d.deptno
+;
+
+-- 81년 입사한 사원들의 사원이름, 직급, 입사년도, 부서이름을 조회하세요.
+SELECT
+    ename 사원이름, job 사원직급, TO_CHAR(hiredate, 'YY') 입사년도, dname 부서이름
+FROM
+    emp e INNER JOIN dept d
+ON
+    -- 조인조건
+    e.deptno = d.deptno
+WHERE
+    TO_CHAR(hiredate, 'YY') = '81'
+;
+
+-- 사원들의 사원이름, 상사이름 을 조회하세요.
+
+-- INNER JOIN
+ SELECT
+    e.ename 사원이름, s.ename 상사이름
+ FROM
+    emp e JOIN emp s
+ ON
+    e.mgr = s.empno
+ ;
+
+-- OUTER JOIN
+SELECT
+    e.ename 사원이름, NVL(s.ename, '상사없음') 상사이름
+FROM
+    emp e LEFT OUTER JOIN emp s
+ON
+    e.mgr = s.empno
+;
+
+-- 사원들의 사원이름, 부서이름, 급여, 급여등급 을 조회하세요.
+SELECT
+    ename 사원이름, dname 부서이름, sal 급여, grade 급여등급
+FROM
+    emp e
+JOIN
+    dept d
+ON
+    e.deptno = d.deptno
+JOIN
+    salgrade
+ON
+    e.sal BETWEEN losal AND hisal
+;
+
+--------------------------------------------------------------------------------
+
+/*
+    NATURAL JOIN
+    ==> 자동 조인
+        반드시 조인 조건식에 사용하는 필드의 이름이 동일하고
+        반드시 동일한 필드가 한개일때 사용할 수 잇는 조인
+        자동으로 중복되는 필드를 사용해서 조인을 하기 때문에
+        조인조건을 기술하지 않는다.
+        
+        형식 ]
+            SELECT
+                필드이름,...
+            FROM
+                테이블1
+            NATURAL JOIN
+                테이블2
+            ;
+            
+    USING JOIN
+    ==> 반드시 조인 조건식에 사용하는 필드의 이름이 동일한 경우
+        그리고 같은 이름의 필드가 여러개 존재해도 무방하다.
+        
+        형식 ]
+            SELECT
+                필드이름, ...
+            FROM
+                테이블1
+            JOIN
+                테이블2
+            USING
+                ( 조인에 사용할 필드이름 )
+            ;
+*/
+
+-- 사원들의 사원이름, 부서이름 을 조회하세요.
+SELECT
+    ename 사원이름, dname 부서이름
+FROM
+    emp
+NATURAL JOIN
+    dept
+;
+
+CREATE TABLE tmp
+AS
+    SELECT
+        e.*, dname
+    FROM
+        emp e, dept d
+    WHERE
+        e.deptno = d.deptno
+;
 
 
-
-
+-- TMP 테이블과  부서정보테이블을 이용해서 
+-- 사원들의 사원이름, 부서위치를 조회하세요.
+SELECT
+    ename, loc
+FROM
+    tmp
+JOIN
+    dept
+USING
+    (deptno)
+;
