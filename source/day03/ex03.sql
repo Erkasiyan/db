@@ -69,6 +69,15 @@
             사원이름, 급여, 입사일, 입사요일, 지급급여
         를 조회하세요.
 */
+SELECT
+    ename 사원이름, sal 급여, TO_CHAR(hiredate, 'YYYY/MM/DD') 입사일, TO_CHAR(hiredate, 'DY') 요일, 
+    DECODE(TO_CHAR(hiredate, 'DY'), '토', sal * 1.2,
+                                    '일', sal * 1.2,
+                                    sal * 1.1
+    ) 지급급여
+FROM
+    emp
+;
 
 /*
     문제 7 ]
@@ -92,6 +101,16 @@
         을 조회하세요.
 */
 
+-- 참고코드
+SELECT
+    ename, LENGTH(ename) 이름글자수, 
+    DECODE(FLOOR(LENGTH(ename) / 5), 0, '다섯글자미만',
+                                        '다섯글자이상') 글자수
+FROM
+    emp
+ORDER BY
+    LENGTH(ename)
+;
 --------------------------------------------------------------------------------
 -- group by
 
