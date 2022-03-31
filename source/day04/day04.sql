@@ -543,12 +543,13 @@ WHERE
             )
 ;
 
--- 10부서 사원들의 직급 평균을 조회하세요.
+-- 10부서 사원들과 같은 직급의 직급 평균을 조회하세요.
 SELECT
     job 직급이름, AVG(sal) 직급급여평균
 FROM
     emp
 WHERE
+
     job IN (
             SELECT
                 job
@@ -559,6 +560,8 @@ WHERE
                 -- 질의명령의 결과는 다중값으로 발생한다. 
                 --     MANAGER, PRESIDENT, CLERK
         )
+
+--    deptno = 10
 GROUP BY
     job
 ;
@@ -582,6 +585,13 @@ WHERE
                     job = 'MANAGER'
              )
 ;
+
+
+/*
+    NO IN (10, 20, 30)
+    
+    NO = 10 OR NO = 20 OR NO = 30
+*/
 
 -- ANY
 -- 각 부서의 평균 급여보다 한부서라도 급여가 높은 사원들의 
@@ -662,6 +672,36 @@ WHERE
     deptno = dno
 ;
 
+
+SELECT
+    ename 사원이름, deptno 부서번호, 
+    (
+        SELECT
+            count(*)
+        FROM
+            emp
+        WHERE
+            deptno = e.deptno
+    ) 부서원수, 
+    (
+        SELECT
+            avg(sal)
+        FROM
+            emp
+        WHERE
+            deptno = e.deptno
+    ) 부서평균급여, 
+    (
+        SELECT
+            SUM(sal)
+        FROM
+            emp
+        WHERE
+            deptno = e.deptno
+    ) 부서급여합계
+FROM
+    emp e
+;
 
 --------------------------------------------------------------------------------
 -- 회사 평균급여보다 적게 받는 사원들의
