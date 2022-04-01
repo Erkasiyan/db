@@ -14,7 +14,11 @@ MODIFY ename VARCHAR2(10 CHAR);
         급여  : 10
         입사일 : 현재시간
 */
-
+INSERT INTO
+    emp1(empno, ename, job, sal)
+VALUES(
+    1005, '둘리', '머슴', 10
+);
 /*
     문제 2 ]
         emp1 테이블에 다음데이터를 입력하세요.
@@ -22,7 +26,11 @@ MODIFY ename VARCHAR2(10 CHAR);
         직급  : 애완동물
         입사일 : 2022년 03월 21일
 */
-
+INSERT INTO
+    emp1(empno, ename, job, hiredate)
+VALUES(
+    1006, '고길동', '애완동물', TO_DATE('2022년 03월 21일', 'YYYY"년 "MM"월 "DD"일"')
+);
 /*
     문제 3 ]
         emp1 테이블에 다음 데이터를 입력하세요.
@@ -47,7 +55,12 @@ MODIFY ename VARCHAR2(10 CHAR);
 UPDATE
     emp1
 SET
-    ename = DECODE()
+    ename = DECODE(ename, '제니', 'Miss.' || ename,
+                          '리사', 'Miss.' || ename,
+                          '로제', 'Miss.' || ename,
+                          '지수', 'Miss.' || ename,
+                          'Mr.' || ename
+    )
 ;
 /*
     문제 5 ]
