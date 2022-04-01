@@ -1,5 +1,11 @@
 -- DML (INSERT, UPDATE, DELETE)
 
+ALTER TABLE emp1
+MODIFY job VARCHAR2(10 CHAR);
+
+ALTER TABLE emp1
+MODIFY ename VARCHAR2(10 CHAR);
+
 /*
     문제 1 ]
         emp1 테이블에 다음 데이터를 입력하세요.
@@ -28,16 +34,21 @@
 */
 
 -- 데이터 수정
+
 /*
     문제 4 ]
         emp1 테이블에서 다음 데이터를 수정하세요.
         제니, 로제, 리사, 지수
-        사원의 이름을 이름앞에 'Miss.' 붙여서
+        사원의 이름을 이름앞에 'Ms.' 붙여서
         이름이 만들어지게 수정하세요.
         나머지사원들은 이름앞에 'Mr.' 을 붙여서 
         수정하세요.
 */
-
+UPDATE
+    emp1
+SET
+    ename = DECODE()
+;
 /*
     문제 5 ]
         emp1 테이블에서 
