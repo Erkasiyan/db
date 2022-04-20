@@ -1,0 +1,64 @@
+문제 1 ]
+CREATE TABLE
+AS
+
+문제 2 ]
+
+문제 3 ]
+SELECT
+	deptno 부서번호
+FROM
+	emp
+GROUP BY
+	deptno
+;
+
+문제 4 ]
+SELECT
+	empno 사원이름, ename 사원이름, comm 이전커미션, NVL2(comm, comm + 100, 50) 지급커미션
+FROM
+	emp
+;
+
+문제 5 ]
+SELECT
+	empno 사원번호, RPAD(SUBSTR(ename, 1, 2), LENGTH(ename), '*') 사원이름, 
+	job 직급,  FLOOR(MONTHS_BETWEEN(sysdate, hiredate)) 근무 개월 수
+FROM
+	emp
+;
+
+문제 6 ]
+SELECT
+	comm , count(*)
+FROM
+	emp
+WHERE
+    comm >= 0
+GROUP BY
+	comm
+;
+
+문제 7 ]
+	
+문제 8 ]
+SELECT
+	empno 사원번호, ename 사원이름, grade 급여등급, dname 부서이름, loc 부서위치
+FROM
+	emp e, dept d, salgrade
+WHERE
+	e.deptno = d.deptno
+	AND sal BETWEEN losal AND hisal
+;
+
+문제 9 ] 
+CREATE VIEW emp_dept
+AS
+	SELECT
+		empno 부서번호, ename 사원이름, e.deptno 부서번호, dname 부서이름
+	FROM
+		emp e, dept d
+	WHERE
+		e.deptno = d.deptno
+
+문제 10 ]
